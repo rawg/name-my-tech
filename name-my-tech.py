@@ -1,28 +1,4 @@
 #!/usr/env/bin/python
-#
-# Hall of Fame
-#  MemoryAuth
-#  StockCloud
-#  ConnectHub
-#  AuthConnect
-#  StateOfTheArtMQ
-#  ScienceHive
-#  TympanuchusMQ
-#  SparkPersist
-#  BaseScript
-#  ForceDuty
-#  OpsSpeed
-#  TitanCasterQL
-#  CloudTeam
-#  GridScale
-#  RabbitBase
-#  AuthScaleCell
-#  MQScale
-#  BigMongoMemory
-#  BigRabbitMemory
-#  SpeedRuby
-#  OpenHadoop
-#  DataQL
 
 import random
 import sys
