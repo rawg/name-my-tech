@@ -48,6 +48,7 @@ buzzy = [
     "Dist",
     "Duty",
     "Force",
+    "Forge",
     "Grid",
     "Hub",
     "Learning",
@@ -60,15 +61,18 @@ buzzy = [
     "Ops",
     "Parse",
     "Persist",
+    "Pub",
     "Row",
     "Scale",
     "Science",
     "Script",
     "Send",
     "Socket",
+    "Space",
     "Speed",
     "Stash",
     "Store",
+    "Sub",
     "Team",
     "Tech",
     "Titan",
@@ -106,31 +110,34 @@ tech = [
 
 # Terms that can only exist at the beginning of a name
 head = [
+    "Ad",
     "Big",
     "Broad",
     "Elastic",
     "Fluid",
     "Inno",
+    "J",
     "ML",
     "Navi",
     "Open",
     "Py",
-    "Volu",
     "Wi",
 ]
 
 # Terms that can only exist at the end of a name
 tail = [
+    "Buster",
+    "Cast",
+    "Caster",
     "FS",
     "IO",
     "MQ",
+    "One",
     "QL",
     "R",
     "X",
     "lang",
-    "Buster",
-    "Cast",
-    "Caster",
+    "ly",
 ]
 
 
@@ -147,17 +154,19 @@ def tech_name():
         is_tail = len(parts) == length - 1
 
         if choice < 1 and (is_head or is_tail) and not has_dict:
+            has_dict = True
             if is_head:
                 term = random.choice(adjectives)
             elif is_tail:
                 term = random.choice(verbs)
 
         elif choice < 2 and not has_dict:
+            has_dict = True
             term = random.choice(nouns)
 
         elif choice < 4 and not has_tech:
-            term = random.choice(tech)
             has_tech = True
+            term = random.choice(tech)
 
         else:
             if is_tail:
