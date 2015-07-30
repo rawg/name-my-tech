@@ -91,6 +91,7 @@ tech = [
     "Drill",
     "Erlang",
     "Giraph",
+    "Go",
     "HBase",
     "Hadoop",
     "Haskell",
