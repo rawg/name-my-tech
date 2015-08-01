@@ -8,7 +8,7 @@ import argparse
 
 # Parse CLI arguments
 parser = argparse.ArgumentParser(description="Name my technology!")
-parser.add_argument("--wordnet", action="store", dest="wordnet_path", help="Location of WordNet database files")
+parser.add_argument("--wordnet", action="store", dest="wordnet_path", default="dict", help="Location of WordNet database files")
 parser.add_argument("amount", action="store", type=int, default=10, metavar="N", help="Number of names to generate")
 args = parser.parse_args()
 
@@ -49,8 +49,10 @@ buzzy = [
     "Duty",
     "Force",
     "Forge",
+    "Geek",
     "Grid",
     "Hub",
+    "Jedi",
     "Learning",
     "Log",
     "MQ",
@@ -59,11 +61,15 @@ buzzy = [
     "Mem",
     "Memory",
     "Mod",
+    "Nerd",
+    "Ninja",
     "Ops",
     "Parse",
     "Persist",
+    "Pirate",
     "Pub",
     "Rapid",
+    "RockStar",
     "Row",
     "Scale",
     "Science",
@@ -73,6 +79,7 @@ buzzy = [
     "Socket",
     "Space",
     "Speed",
+    "Star",
     "Stash",
     "Store",
     "Sub",
@@ -133,6 +140,7 @@ tail = [
     "Buster",
     "Cast",
     "Caster",
+    "ery",
     "FS",
     "IO",
     "Miner",
