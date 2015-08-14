@@ -31,38 +31,17 @@ db_path = args.db_path
 conn = sqlite3.connect(db_path)
 curs = conn.cursor()
 
-try:
-    curs.execute("drop table words")
-except OperationalError:
-    pass
 
-ddl = """
-create table words (
-  id integer primary key,
-  word text,
-
-  is_suffix integer default 0,
-  is_prefix integer default 0,
-  is_webscale integer default 0,
-  is_noun integer default 0,
-  is_verb integer default 0,
-  is_adj integer default 0,
-  is_dict integer default 0,
-  is_bigdata integer default 0,
-  is_language integer default 0,
-  is_tech integer default 0,
-  is_buzzword integer default 0,
-  is_word integer default 0,
-  is_devops integer default 0
-
-)
-"""
-
-curs.execute(ddl)
-
+sql = "create table %s (id integer primary key, word text)"
+for table in ["suffix", "prefix", "webscale", "noun", "verb", "adj", "language", "bigdata", "tech", "devops"]:
+    try:
+        curs.execute("drop table %s" % table)
+    except OperationalError:
+        pass
+    curs.execute(sql % table)
 
 def read_wordnet(curs, pos, path=wordnet_path):
-    sql = "insert into words (word, is_%s, is_word, is_dict) values (?, 1, 1, 1)" % pos
+    sql = "insert into %s (word) values (?)" % pos
     regex = re.compile("^[0-9].*")
 
     with open(os.path.join(path, "data." + pos), "r") as f:
@@ -82,13 +61,17 @@ read_wordnet(curs, "verb")
 conn.commit()
 
 with open("buzzwords.csv", "r") as f:
-    sql = "insert into words (word, is_suffix, is_prefix, is_webscale, is_bigdata, is_language, is_tech, is_devops, is_buzzword, is_word) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-    reader = csv.reader(f)
-    reader.next()
+    reader = csv.DictReader(f)
+
+    def insert(cat, word):
+        sql = "insert into %s (word) values (?)" % cat
+        curs.execute(sql, (word, ))
 
     for row in reader:
-        curs.execute(sql, row)
+        for key in row:
+            if key[0:3] == "is_" and row[key]:
+                insert(key[3:], row["word"])
 
 conn.commit()
 conn.close()
