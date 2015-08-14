@@ -6,38 +6,67 @@ from nltk.corpus import wordnet as wn
 
 RECORD_LIMIT = 50
 
-categories = {
-    "tech": "is_tech=1",
-    "bigdata": "is_bigdata=1",
-    "datascience": "is_bigdata=1",
-    "devops": "is_devops=1",
-    "suffix": "is_suffix=1",
-    "prefix": "is_prefix=1",
-    "language": "is_language=1",
-    "webscale": "is_webscale=1",
-    "word": "is_word=1",
-    "buzzword": "is_buzzword=1",
-    "dict": "is_dict=1",
-    "adj": "is_adj=1",
-    "noun": "is_noun=1",
-    "verb": "is_verb=1",
+
+categories = ["tech", "bigdata", "devops", "webscale", "language", "adj", "noun", "verb", "prefix", "suffix"]
+
+
+expansions = {
+    "buzzword": ["tech", "bigdata", "devops", "webscale", "language"],
+    "dict": ["adj", "noun", "verb"],
+    "word": ["tech", "bigdata", "devops", "webscale", "language", "adj", "noun", "verb"],
 }
 
+
+# TODO pull this dynamically, or at least inject it from db creation script
+counts = {
+    "noun": 82192,
+    "suffix": 17,
+    "language": 14,
+    "bigdata": 49,
+    "devops": 37,
+    "prefix": 16,
+    "verb": 13789,
+    "webscale": 46,
+    "tech": 33,
+    "adj": 18185,
+}
+
+
+# TODO refactor so that module-level DB connection is not necessary
 conn = sqlite3.connect("words.db")
 curs = conn.cursor()
 
 def get_words(cat):
-    # order by random() doesn't perform so well, but good enough for this...
-    # see also: http://stackoverflow.com/questions/4114940/select-random-rows-in-sqlite
     sql = "select word from words where %s order by random() limit %i"
     return [row[0] for row in curs.execute(sql % (categories[cat], RECORD_LIMIT))]
 
 def words(gen, cats):
     words = gen()
+
+    # Process category expansions, like "dict" -> "noun", "verb", "adj"
+    for cat in cats:
+        if cat in expansions:
+            cats += expansions[cat]
+            cats.remove(cat)
+
+    for cat in cats:
+        if cat[0] == "^" and cat[1:] in categories:
+            cats.remove(cat[1:])
+
+    tables = []
     for cat in cats:
         if cat in categories:
-            words += get_words(cat)
-    return random.choice(words)
+            tables.append((cat, random.randint(1, counts[cat])))
+
+    sql = " union ".join(["select word from %s where id = %i" % t for t in tables])
+    if len(tables) > 1:
+        # order by random() doesn't perform so well, but good enough for this...
+        # see also: http://stackoverflow.com/questions/4114940/select-random-rows-in-sqlite
+        sql = "select word from (%s) order by random() limit 1" % sql
+
+    print sql
+    curs.execute(sql)
+    return str(curs.fetchone()[0])
 
 def twice(gen):
     return gen() + gen()

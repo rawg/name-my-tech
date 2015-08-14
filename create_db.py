@@ -33,30 +33,13 @@ curs = conn.cursor()
 
 
 sql = "create table %s (id integer primary key, word text)"
-for table in ["suffix", "prefix", "webscale", "noun", "verb", "adj", "language", "bigdata", "tech", "devops"]:
+tables = ["suffix", "prefix", "webscale", "noun", "verb", "adj", "language", "bigdata", "tech", "devops"]
+for table in tables:
     try:
         curs.execute("drop table %s" % table)
     except OperationalError:
         pass
     curs.execute(sql % table)
-
-def read_wordnet(curs, pos, path=wordnet_path):
-    sql = "insert into %s (word) values (?)" % pos
-    regex = re.compile("^[0-9].*")
-
-    with open(os.path.join(path, "data." + pos), "r") as f:
-        for line in f:
-            if regex.match(line):
-                terms = []
-                for term in line.split()[4].split("_"):
-                    terms.append(term.strip().capitalize())
-
-                word = "".join(terms)
-                curs.execute(sql, (word, ))
-
-read_wordnet(curs, "adj")
-read_wordnet(curs, "noun")
-read_wordnet(curs, "verb")
 
 conn.commit()
 
@@ -73,6 +56,35 @@ with open("buzzwords.csv", "r") as f:
             if key[0:3] == "is_" and row[key]:
                 insert(key[3:], row["word"])
 
+
+def read_wordnet(curs, pos, path=wordnet_path):
+    sql = "insert into %s (word) values (?)" % pos
+    regex = re.compile("^[0-9].*")
+
+    with open(os.path.join(path, "data." + pos), "r") as f:
+        for line in f:
+            if regex.match(line):
+                terms = []
+                for term in line.split()[4].replace("-", "_").split("_"):
+                    terms.append(term.strip().capitalize())
+
+                word = "".join(terms)
+                curs.execute(sql, (word, ))
+
+read_wordnet(curs, "adj")
+read_wordnet(curs, "noun")
+read_wordnet(curs, "verb")
+
 conn.commit()
+
+
+counts = {}
+for table in tables + ["adj", "noun", "verb"]:
+    curs.execute("select count(*) from %s" % table)
+    counts[table] = curs.fetchone()[0]
+
+print "Record counts:"
+print counts
+
 conn.close()
 
