@@ -5,7 +5,7 @@ import re
 from nltk.corpus import wordnet as wn
 
 RECORD_LIMIT = 50
-
+MAX_ITERS = 10
 
 categories = ["tech", "bigdata", "devops", "webscale", "language", "adj", "noun", "verb", "prefix", "suffix"]
 
@@ -64,7 +64,7 @@ def words(gen, cats):
         # see also: http://stackoverflow.com/questions/4114940/select-random-rows-in-sqlite
         sql = "select word from (%s) order by random() limit 1" % sql
 
-    print sql
+    #print sql
     curs.execute(sql)
     return str(curs.fetchone()[0])
 
@@ -88,14 +88,45 @@ def synonymous(gen, term):
     term = str(term)
     syns = set()
     for syn in wn.synsets(term):
-        for lemma in syn.lemmas():
-            syns.add(lemma.name())
+        for lemma in syn.lemmas:
+            syns.add(lemma.name)
     return camel_case(str(random.choice(list(syns))))
 
 def camel_case(gen):
     if not isinstance(gen, str):
         gen = gen()
     return "".join([s[0].upper() + s[1:].lower() for s in gen.replace("_", " ").split()])
+
+expressions = {
+    ":consonant:": "[bcdfghjklmnpqrstvwxyz]+",
+    ":vowel:": "[aeiou]+"
+}
+
+def ends_with(gen, expr):
+    if expr in expressions:
+        expr = expressions[expr]
+
+    expr = expr + "$"
+
+    return regex(gen, expr)
+
+def starts_with(gen, expr):
+    if expr in expressions:
+        expr = expressions[expr]
+
+    expr = "^" + expr
+
+    return regex(gen, expr)
+
+def regex(gen, expr):
+    term = gen()
+    iters = 0
+
+    while not re.match(term, expr) and iters < MAX_ITERS:
+        term = gen()
+        iters += 1
+
+    return term
 
 filters = {
     "words": words,
@@ -105,6 +136,9 @@ filters = {
     "repeat": repeat,
     "synonymOf": synonymous,
     "camelCase": camel_case,
+    "endsWith": ends_with,
+    "startsWith": starts_with,
+    "regex": regex,
 }
 
 generators = ["synonymOf", "words"]
@@ -147,7 +181,11 @@ def expand(expr):
     return expr
 
 
-
+print expand("{buzzword}{suffix}")
+print expand("{prefix}{buzzword|repeat 2}")
+print expand("{tech|repeat 2}")
+print expand("{synonymOf speedy}{suffix}")
+print expand("{noun|endsWith :consonant:}ly")
 
 
 
