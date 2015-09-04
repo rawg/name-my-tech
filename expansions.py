@@ -81,8 +81,16 @@ def repeat(gen, times=2):
     times = int(times)
     return reduce((lambda l, r: l + r), [gen() for i in range(0, times)])
 
-def repeat_decay(gen, times=2, rate=0.7):
-    pass
+def repeat_range(gen, low=2, high=4, mode=None):
+    times = round(random.triangular(float(low), float(high), float(mode)))
+    print(times)
+    return repeat(gen, times)
+
+def several(gen):
+    return repeat_range(gen, 2, 4, 2.5)
+
+def few(gen):
+    return repeat_range(gen, 1, 2, 1.1)
 
 def synonymous(gen, term):
     term = str(term)
@@ -134,6 +142,9 @@ filters = {
     "upper": upper,
     "lower": lower,
     "repeat": repeat,
+    "range": repeat_range,
+    "several": several,
+    "few": few,
     "synonymOf": synonymous,
     "camelCase": camel_case,
     "endsWith": ends_with,
@@ -180,13 +191,14 @@ def expand(expr):
 
     return expr
 
-
+"""
+print expand("{word|range 1 4 2}")
 print expand("{buzzword}{suffix}")
 print expand("{prefix}{buzzword|repeat 2}")
 print expand("{tech|repeat 2}")
 print expand("{synonymOf speedy}{suffix}")
 print expand("{noun|endsWith :consonant:}ly")
-
+"""
 
 
 
