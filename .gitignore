@@ -1,4 +1,7 @@
 
+# SQLite databases
+*.db
+
 # Default WordNet dictionary path
 dict/
 
